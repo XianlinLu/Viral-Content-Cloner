@@ -93,7 +93,7 @@ Analyze these five videos as a batch. Extract their shared first-three-second ho
 .
 ├── SKILL.md
 ├── README.md
-├── LICENSE
+├── LICENSE.md
 ├── agents/
 │   └── openai.yaml
 └── references/
@@ -124,7 +124,7 @@ The validator checks frontmatter, naming, and unfinished scaffold markers. Befor
 
 ### License
 
-MIT. See [LICENSE](./LICENSE).
+MIT. See [LICENSE.md](./LICENSE.md).
 
 ---
 
@@ -219,7 +219,7 @@ Lumina Agent 只有在工作流被封装成 **Component** 并作为 **Tool** 连
 .
 ├── SKILL.md
 ├── README.md
-├── LICENSE
+├── LICENSE.md
 ├── agents/
 │   └── openai.yaml
 └── references/
@@ -250,4 +250,4 @@ python /path/to/skill-creator/scripts/quick_validate.py .
 
 ### 许可证
 
-MIT，详见 [LICENSE](./LICENSE)。
+MIT，详见 [LICENSE.md](./LICENSE.md)。
