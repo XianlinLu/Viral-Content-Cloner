@@ -1,0 +1,7 @@
+interface:
+  display_name: "Lumina Viral Content Cloner"
+  short_description: "把参考视频拆解为可执行的 Lumina 画布复刻工作流"
+  brand_color: "#5B5BD6"
+  default_prompt: "Use $lumina-viral-content-cloner to analyze this reference video and build a traceable Lumina Canvas replication workflow."
+policy:
+  allow_implicit_invocation: true
