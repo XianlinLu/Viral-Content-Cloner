@@ -3,7 +3,7 @@ name: lumina-viral-content-cloner
 description: Reverse-engineer one or more reference videos inside Lumina Canvas, build an auditable node graph, and optionally generate a faithful or adapted remake with face, body, product, or full material replacement. Use for requests such as “复刻这个视频”, “分析爆款视频”, “拆解参考片”, “批量复刻”, or “build this reference as a Lumina workflow”. Do not use for unrelated editing or from-scratch ideation without a reference video.
 license: MIT
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   compatibility: "Lumina Canvas Agent"
 ---
 
@@ -20,6 +20,15 @@ Do not activate for:
 - video creation with no reference; use a from-scratch creative workflow;
 - simple trimming, resizing, captioning, or format conversion;
 - requests that only ask for a written review with no replication intent.
+
+## Language Routing
+
+Maintain `interaction_language` and `content_language` separately.
+
+- Resolve `interaction_language` from the user's newest direct instruction. Ignore language found only in attachments, quoted source material, code, metadata, proper names, or tool output. If the message mixes languages, obey an explicit language request; otherwise use the language carrying the latest substantive request; otherwise retain the established conversation language.
+- Use `interaction_language` for every visible question, option, heading, recommendation, node-status note, confirmation request, error, QA report, and delivery summary.
+- Resolve `content_language` from an explicit request first; otherwise retain the language of source dialogue in `exact`; otherwise use `interaction_language`. Dialogue, narration, subtitles, and character speech use `content_language`.
+- When a connected component requires a different prompt language, translate only the hidden tool parameter. Do not switch the visible conversation language.
 
 ## Lumina Runtime Contract
 
@@ -124,6 +133,8 @@ INPUTS
 
 Keep source, evidence, prompts, anchors, generated clips, and final exports on the canvas. Name nodes with stable prefixes such as `01_source`, `02_frames`, `03_transcript`, `04_analysis`, `05_prompt`, `06_anchor`, `07_clip`, `08_qa`, `09_export`.
 
+When people appear in the planned output, replace the generic anchor stage with the gated production branch below. A multi-character shot may consume several separately approved character nodes, but a character asset node may never contain or represent more than one person.
+
 In `build`, stop after the graph is wired and parameters are populated. In `auto`, continue.
 
 ### 5. Prompt assembly
@@ -136,11 +147,16 @@ Read [references/prompt-assembly.md](references/prompt-assembly.md) for the four
 
 For `auto` only:
 
-1. Generate and approve person, product, and scene anchors before clips.
-2. Reuse the same anchors, seed where supported, aspect ratio, and style lock across all shots.
-3. Generate clips independently so one failure does not invalidate the sequence.
-4. Compose clips in timestamp order; add dialogue, music, effects, and subtitles.
-5. Export the requested master and keep each intermediate node traceable.
+1. Lock the analyzed or rewritten screenplay, then extract the cast, scenes, dialogue order, shots, continuity, and target duration.
+2. Create exactly one character asset node per character. Each asset must contain one person only. Never place two or more people, a group portrait, a contact sheet of different identities, or multiple characters inside one character asset node.
+3. Connect each character prompt/profile node to its own image-generation node, run it, verify a real successful output and a valid edge, then show every character asset separately to the user.
+4. Stop at the character approval gate. Silence, an earlier broad approval, or node success is not approval. Continue only after the user explicitly confirms each required character asset; regenerate only rejected characters and ask again.
+5. After character approval, follow the user's audio choice per character. If audio is requested, create one corresponding character-audio node, use that character's approved image as its identity input, connect the approved asset node to the audio node, and verify that the edge and audio output both succeeded. If audio is not requested, do not create or run a character-audio node.
+6. Generate product and scene anchors, a storyboard table, and shot prompts from only confirmed dependencies. Multi-character shots receive one separate incoming edge from each approved character asset; never merge them into a combined character-reference asset.
+7. Generate scene or shot video nodes in story order, using local zero-based timing inside each generation call. Reuse confirmed assets, audio, seeds where supported, aspect ratio, and style locks. Preserve successful upstream nodes when one shot fails.
+8. Compose only verified outputs in timestamp order; add requested dialogue, music, effects, and subtitles, then export the requested master with every intermediate node traceable.
+
+Read [references/short-drama-production.md](references/short-drama-production.md) before any media generation involving characters. Its state ledger, approval gate, audio branching, edge verification, and invalidation rules are mandatory.
 
 Do not silently substitute an unavailable model. Choose the closest connected component and record the substitution in the run summary.
 
@@ -150,6 +166,10 @@ Read [references/qa-and-fallbacks.md](references/qa-and-fallbacks.md). Before de
 
 - analysis JSON parses and includes all required fields;
 - prompt `@` references match the resolved mode;
+- every character asset contains exactly one person and has its own node;
+- every character used downstream has explicit user approval recorded against the current asset version;
+- requested character audio has one verified node and successful edge from the matching approved character asset;
+- opted-out character audio has no generated audio node or dangling audio edge;
 - `clone` has no replacement-material reference;
 - product/full swap contains an explicit product-fidelity lock;
 - spoken content is present when speech evidence exists;

@@ -9,8 +9,10 @@
 ```text
 Reference video
   ├─ Visual samples / timestamp evidence ─┐
-  ├─ Audio / dialogue transcript ─────────┼→ Analysis → Prompt package → Anchors → Clips → QA → Export
+  ├─ Audio / dialogue transcript ─────────┼→ Analysis → Script lock → Solo character nodes → User approval
   └─ Person / product references ─────────┘
+                                                        ↓
+                                  Optional character audio → Storyboard → Video → QA → Export
 ```
 
 The Skill is designed around Lumina's native Agent, Node, Component, Tool, multimodal input, named `@` reference, and visual workflow concepts. Every stage remains visible on the Canvas so a creator can inspect, rerun, replace, or reuse it independently.
@@ -21,6 +23,10 @@ The Skill is designed around Lumina's native Agent, Node, Component, Tool, multi
 - Use `exact` mode for close reconstruction or `rewrite` mode for transferable viral structure.
 - Support pure cloning, person replacement, product/garment replacement, and full replacement.
 - Produce structured analysis, timestamped dialogue, a global continuity prompt, and shot prompts.
+- Automatically match all visible interaction to the user's language while routing dialogue, subtitles, narration, and speech through a separately controlled content language.
+- Use a gated short-drama production flow: confirmed story, cast extraction, solo character assets, explicit user approval, optional character audio, storyboard, video, QA, and export.
+- Enforce one character asset per node and exactly one person per character asset. Multi-character shots connect several approved solo nodes instead of using a combined cast asset.
+- Generate character audio only when requested, only after that character is approved, and only through a verified edge from the matching character image node.
 - Build a reusable Canvas graph without generating media, or continue through generation and export.
 - Preserve successful nodes and provide explicit recovery paths when a component is unavailable or fails.
 
@@ -33,6 +39,8 @@ The Skill is designed around Lumina's native Agent, Node, Component, Tool, multi
 | Reasoning | Vision-capable Agent model and structured analysis Component |
 | Generation control | Named inputs such as `@person_ref`, `@product_ref`, and `@scene_anchor` |
 | Continuity | Shared anchors, stable prompts, optional fixed seeds, and shot-level QA |
+| Character control | One solo character per node, versioned approvals, and separate named edges into multi-character shots |
+| Optional character audio | One approved character image → one matching audio node; omitted completely when not requested |
 | Recovery | Node-level retries, isolated regeneration, visible missing-tool placeholders |
 | Delivery | Preview, composition, subtitle/audio, save, and export Components |
 
@@ -101,6 +109,7 @@ Analyze these five videos as a batch. Extract their shared first-three-second ho
     ├── media-analysis.md
     ├── analysis-schemas.md
     ├── prompt-assembly.md
+    ├── short-drama-production.md
     └── qa-and-fallbacks.md
 ```
 
@@ -108,6 +117,8 @@ Analyze these five videos as a batch. Extract their shared first-three-second ho
 
 - **Evidence first:** describe only what the supplied video frames and audio support.
 - **Canvas traceability:** keep sources, evidence, prompts, anchors, clips, QA, and exports visible.
+- **Human approval gates:** never treat node success or silence as character approval.
+- **Single-character assets:** one person, one asset, one node, with separate edges into every dependent generator.
 - **Local retries:** regenerate only the failed stage or shot instead of repeating successful work.
 - **Compute awareness:** only `auto` proceeds into generation; `build` stops at a runnable workflow.
 - **Honest degradation:** identify what is missing, why it failed, its impact, and the recovery action.
@@ -135,8 +146,10 @@ MIT. See [LICENSE.md](./LICENSE.md).
 ```text
 参考视频
   ├─ 视觉采样 / 时间戳证据 ─┐
-  ├─ 音频 / 对白转录 ──────┼→ 结构化分析 → Prompt 包 → 锚点 → 分镜视频 → QA → 导出
+  ├─ 音频 / 对白转录 ──────┼→ 结构化分析 → 剧本锁定 → 独立人物节点 → 用户确认
   └─ 人物 / 商品替换素材 ──┘
+                                                        ↓
+                                  可选人物音频 → 分镜表 → 视频生成 → QA → 导出
 ```
 
 整套 Skill 围绕 Lumina 原生的 Agent、Node、Component、Tool、多模态输入、命名式 `@` 引用和可视化工作流进行设计。每个阶段都会保留在画布中，方便创作者独立检查、重跑、替换与复用。
@@ -147,6 +160,10 @@ MIT. See [LICENSE.md](./LICENSE.md).
 - 使用 `exact` 模式进行精确复刻，或使用 `rewrite` 模式提取可迁移的爆款结构。
 - 支持纯复刻、替换人物、替换商品/服装以及人物与商品全替换。
 - 输出结构化分析、时间轴对白、全局一致性 Prompt 和逐镜 Prompt。
+- 自动适配用户当前使用的语言，同时将对白、字幕、旁白和语音作为独立的内容语言进行控制。
+- 使用带硬门槛的短剧生产流程：确认故事、拆分角色、生成独立人物素材、用户逐一确认、按需生成人物音频、制作分镜、生成视频、QA 与导出。
+- 强制一个人物素材对应一个节点，且每张人物素材只能出现一个人物。多人镜头必须分别连接多个已确认的单人人物节点，禁止使用合并人物素材。
+- 仅在用户需要时生成人物音频；必须先确认对应人物图，再由该人物图通过真实连线连接到专属音频节点。
 - 可以只搭建可复用画布，也可以继续执行生成、合成与导出。
 - 当组件缺失或节点失败时，保留成功结果并提供明确的恢复路径。
 
@@ -159,6 +176,8 @@ MIT. See [LICENSE.md](./LICENSE.md).
 | 分析推理 | 具备视觉能力的 Agent 模型与结构化分析 Component |
 | 生成控制 | `@person_ref`、`@product_ref`、`@scene_anchor` 等命名输入 |
 | 一致性控制 | 共享锚点、稳定 Prompt、可选固定 Seed 与逐镜 QA |
+| 人物控制 | 一人一节点、版本化确认，多人镜头分别接入独立人物节点 |
+| 可选人物音频 | 一个已确认人物图连接一个对应音频节点；用户不需要时完全不生成 |
 | 故障恢复 | 节点级重试、局部重生成与可见的缺失工具占位 |
 | 结果交付 | 预览、合成、音频/字幕、保存与导出 Component |
 
@@ -227,6 +246,7 @@ Lumina Agent 只有在工作流被封装成 **Component** 并作为 **Tool** 连
     ├── media-analysis.md
     ├── analysis-schemas.md
     ├── prompt-assembly.md
+    ├── short-drama-production.md
     └── qa-and-fallbacks.md
 ```
 
@@ -234,6 +254,8 @@ Lumina Agent 只有在工作流被封装成 **Component** 并作为 **Tool** 连
 
 - **证据优先**：只描述用户提供的视频画面与音频真正支持的内容。
 - **画布可追溯**：源素材、证据、Prompt、锚点、镜头、QA 和导出全部保留在画布中。
+- **人工确认门槛**：节点成功或用户沉默都不能代替人物素材确认。
+- **单人人物资产**：一个人物、一份素材、一个节点，并通过独立连线接入所有下游生成节点。
 - **局部重试**：只重生成失败阶段或镜头，不重复消耗已经成功的节点。
 - **算力克制**：只有 `auto` 会进入生成阶段；`build` 停在可运行工作流。
 - **诚实降级**：明确缺少什么、失败原因、质量影响与恢复动作。

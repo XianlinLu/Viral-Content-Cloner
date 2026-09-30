@@ -73,9 +73,11 @@ Do not generalize a functional demonstration if the replacement lacks that featu
 ## Canvas reference rules
 
 - Use named references: `@source_video`, `@person_ref`, `@product_ref`, `@scene_anchor`, `@first_frame`, `@last_frame`, `@dialogue_audio`.
+- For a cast, use one stable name per approved solo-character node, such as `@character_hero` and `@character_rival`. Never use a combined cast image as a character asset reference.
 - A reference must be connected to the node that uses it.
 - Do not mention a disconnected or nonexistent `@` input.
 - Reuse the same anchors across shots. Do not regenerate identity or product anchors inside every shot branch.
+- A multi-character shot must receive a separate Canvas edge for each character reference. Keep optional character audio on matching per-character branches until the dialogue-mix stage.
 - Keep one canonical Text node for the global continuity prompt and fan it out to shot nodes.
 
 ## Shot prompt structure

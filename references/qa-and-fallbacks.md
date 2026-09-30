@@ -21,6 +21,9 @@ Load this reference during validation or after any node failure.
 
 ### Visual gate
 
+- Every required character has one dedicated asset node, and every character asset depicts exactly one person.
+- No character asset contains a couple, crowd, second identity, background person, reflected person, portrait, poster, or screen showing another human.
+- The current asset version for every downstream character has explicit user confirmation.
 - Person identity, age, face, hair, body, and clothing remain consistent when they should.
 - Product color, shape, material, pattern, and logo placement do not drift.
 - Scene layout, prop placement, time of day, lighting direction, and palette stay stable.
@@ -29,6 +32,9 @@ Load this reference during validation or after any node failure.
 
 ### Timeline/audio gate
 
+- Each character's audio choice is recorded. Requested audio is generated only after asset confirmation; unrequested audio has no generation node.
+- Every requested character-audio node receives a verified edge from the matching approved character asset node and represents only that character.
+- Multi-character shots receive separate character-reference edges rather than a combined character asset.
 - No missing, duplicated, overlapping, or out-of-order shot.
 - Dialogue and visible speaker are synchronized where required.
 - Music does not mask speech; effects occur at the correct action.
@@ -56,6 +62,9 @@ Do not rerun successful upstream nodes unless the evidence itself is wrong. Rege
 | no audio track | inspector reports none | skip transcription normally | visual-only analysis |
 | transcription fails | error/timeout | retry, then use burned-in captions if clearly readable | dialogue may be incomplete |
 | replacement reference missing | resolved mode needs absent input | fall back to clone only if that still meets user intent; otherwise pause that branch | no requested swap |
+| character asset contains multiple people | visual inspection fails | tighten the solo-character prompt and regenerate only that character | stop its dependent audio and video branches |
+| character approval missing | current asset version is pending/revise | display that asset separately and request explicit confirmation | no dependent audio or video generation |
+| character audio edge missing or mismatched | canvas edge absent or wrong source character | reconnect the approved matching asset and rerun only that audio node | omit that character's audio until verified |
 | anchor generation drifts | identity/product mismatch | tighten anchor prompt, reuse accepted seed/reference, enable face or reference protection | stop before clips if unresolved |
 | one clip fails | generation node error | regenerate only that clip; simplify motion before model substitution | sequence with labeled gap if unresolved |
 | composition fails | timeline/export error | retain ordered clips and audio/subtitle assets | no final master |
@@ -92,3 +101,5 @@ Do not say “finished” until the promised execution-mode output exists:
 - `analyze`: parsed analysis + transcript status + prompt package;
 - `build`: connected graph with visible parameters and missing-tool labels;
 - `auto`: previewable/exportable master plus QA report.
+
+For character-based `auto` runs, completion also requires a passing ledger from `short-drama-production.md`. A final export does not override a failed character, approval, audio, or edge gate.

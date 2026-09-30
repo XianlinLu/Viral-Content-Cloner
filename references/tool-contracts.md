@@ -12,7 +12,8 @@ Lumina Agent can call a workflow only after it is packaged as a Component and co
 | `sample_frames` | video + sampling config | timestamped frames or contact sheets | Preserve source timestamps and ordering |
 | `transcribe_audio` | video/audio + language hint | transcript + timestamps | Speaker labels and emotion are optional but useful |
 | `analyze_reference` | frames/video + transcript | schema-valid JSON | Must accept both evidence branches together |
-| `generate_image` | prompt + optional references | image | Used for person/product/scene anchors |
+| `generate_image` | prompt + optional references | image | Character mode must return one solo identity per node |
+| `generate_character_audio` | one approved character image + speech/voice settings | one character audio artifact | Optional; create only when requested for that character |
 | `generate_video` | prompt + optional image/audio/video refs | clip | Prefer models with reference and first/last-frame control |
 | `compose_timeline` | ordered clips + audio/subtitles | master video | Must preserve requested aspect ratio and timing |
 | `preview_or_export` | media | visible preview or downloadable file | Success must be observable |
@@ -37,6 +38,12 @@ Lumina Agent can call a workflow only after it is packaged as a Component and co
 
 > Generates a single character, product, or scene anchor image from a prompt and named references. Keep the requested aspect ratio and return an image that can feed downstream video nodes.
 
+For character assets, configure a separate generator node for every `character_id`. The returned asset must show exactly one person. Do not use one generator node to emit a combined cast sheet.
+
+### Character audio generator
+
+> Accepts exactly one explicitly approved character image and that character's requested speech or voice settings. Returns one audio artifact for that character. It must not run when the user opted out of character audio.
+
 ### Shot generator
 
 > Generates one shot from a shot prompt and named anchor inputs. Required: duration and aspect ratio. Optional: first frame, last frame, reference video, reference audio, seed. Returns one video clip.
@@ -52,4 +59,7 @@ Lumina Agent can call a workflow only after it is packaged as a Component and co
 - Preserve the original source node even after derived frames or audio exist.
 - Keep replacement materials on a separate branch so mode changes do not require re-ingest.
 - Connect only the references required by the resolved replacement mode.
+- Keep one character asset per node and one optional character-audio node per character. Character asset nodes never contain two or more people.
+- Connect each approved character image directly to its matching character-audio node before running audio. Verify the real Canvas edge and returned artifact; a textual `@` mention is not proof of connection.
+- Multi-character video nodes receive separate named edges from separately approved character asset nodes.
 - A green/successful node is necessary but not sufficient; preview the semantic result before marking QA complete.
