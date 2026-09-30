@@ -3,7 +3,7 @@ name: lumina-viral-content-cloner
 description: Reverse-engineer one or more reference videos inside Lumina Canvas, build an auditable node graph, and optionally generate a faithful or adapted remake with face, body, product, or full material replacement. Use for requests such as “复刻这个视频”, “分析爆款视频”, “拆解参考片”, “批量复刻”, or “build this reference as a Lumina workflow”. Do not use for unrelated editing or from-scratch ideation without a reference video.
 license: MIT
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
   compatibility: "Lumina Canvas Agent"
 ---
 
@@ -95,6 +95,7 @@ Use node names, not ordinal assumptions such as “image 1”, whenever Canvas e
 
 ### 0. Preflight
 
+- Detect the uploaded media type before creating any Canvas source node. When the user supplies a video file or a URL that resolves to video media, the source must be a Lumina built-in Video node.
 - Confirm the source is readable and within Lumina's current upload/runtime limits.
 - Record duration, resolution, aspect ratio, frame rate when exposed, audio-track presence, and input count.
 - Inventory connected tools and select `analyze`, `build`, or `auto`.
@@ -102,7 +103,11 @@ Use node names, not ordinal assumptions such as “image 1”, whenever Canvas e
 
 ### 1. Ingest and branch
 
-Place each source video in its own labeled group. Branch it into visual sampling and audio transcription so independent work can run concurrently when the connected tools support it.
+For every uploaded reference video, create or reuse exactly one Lumina built-in Video node named `01_source_video_<id>`. Bind the original upload to that node, wait for it to load, and verify that the node is visibly present on the Canvas with a playable preview or readable video metadata before continuing.
+
+Never route a video upload into an Image, Audio, Text, Note, generic File, generated-video, Component placeholder, or unrelated node. Do not claim successful ingest from a filename or URL alone. If the runtime cannot create or expose the native Video node, stop the affected input branch and report the missing capability; do not substitute another node type.
+
+Place each verified native Video node in its own labeled group. Branch it into visual sampling and audio transcription so independent work can run concurrently when the connected tools support it.
 
 Read [references/media-analysis.md](references/media-analysis.md) for frame selection, contact sheets, audio handling, and batch behavior.
 
@@ -125,7 +130,7 @@ Read [references/analysis-schemas.md](references/analysis-schemas.md) and return
 Build a left-to-right graph with visible groups:
 
 ```text
-INPUTS
+NATIVE VIDEO INPUTS
   -> VISUAL EVIDENCE ----\
   -> AUDIO EVIDENCE ------> ANALYSIS -> PROMPT PACKAGE -> GENERATION -> QA -> EXPORT
   -> MATERIAL REFERENCES-/
@@ -165,6 +170,8 @@ Do not silently substitute an unavailable model. Choose the closest connected co
 Read [references/qa-and-fallbacks.md](references/qa-and-fallbacks.md). Before declaring completion, verify:
 
 - analysis JSON parses and includes all required fields;
+- every uploaded reference video is represented by a visible, loaded Lumina built-in Video node with the original upload bound to it;
+- no reference video is represented by an unrelated or generic fallback node;
 - prompt `@` references match the resolved mode;
 - every character asset contains exactly one person and has its own node;
 - every character used downstream has explicit user approval recorded against the current asset version;

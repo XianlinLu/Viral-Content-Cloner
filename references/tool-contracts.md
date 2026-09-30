@@ -8,6 +8,7 @@ Lumina Agent can call a workflow only after it is packaged as a Component and co
 
 | Contract | Required input | Required output | Notes |
 |---|---|---|---|
+| `create_native_video_node` | uploaded video asset or resolved video URL | visible, loaded Lumina built-in Video node | Required first step for every reference video; no unrelated fallback node |
 | `inspect_video` | video | metadata + audio presence | Duration, dimensions, aspect ratio, frame rate when available |
 | `sample_frames` | video + sampling config | timestamped frames or contact sheets | Preserve source timestamps and ordering |
 | `transcribe_audio` | video/audio + language hint | transcript + timestamps | Speaker labels and emotion are optional but useful |
@@ -18,7 +19,9 @@ Lumina Agent can call a workflow only after it is packaged as a Component and co
 | `compose_timeline` | ordered clips + audio/subtitles | master video | Must preserve requested aspect ratio and timing |
 | `preview_or_export` | media | visible preview or downloadable file | Success must be observable |
 
-`auto` requires every contract from ingest through export. `analyze` needs only the first four. `build` may create placeholders for unavailable downstream contracts, but each placeholder must be visibly labeled `MISSING TOOL`.
+`auto` requires every contract from ingest through export. `analyze` needs the native video node plus inspection, sampling or direct understanding, transcription when audio exists, and reference analysis. `build` may create placeholders for unavailable downstream contracts, but each placeholder must be visibly labeled `MISSING TOOL`.
+
+The native source Video node is required in every mode. A placeholder is not acceptable for an uploaded reference that the workflow claims to have ingested.
 
 ## Agent configuration
 
@@ -29,6 +32,10 @@ Lumina Agent can call a workflow only after it is packaged as a Component and co
 - Prefer stable node names so prompts can reference `@person_ref`, `@product_ref`, `@scene_anchor`, and `@shot_prompt` instead of positional inputs.
 
 ## Suggested tool descriptions
+
+### Native video-node loader
+
+> Accepts the user's original video upload or a URL verified to resolve to video media. Creates or reuses Lumina's built-in Video node, binds the media source, places the node visibly on the Canvas, waits for loading, and returns the node id, native node type, load status, visibility state, source binding, duration, dimensions, and preview readiness. It must fail rather than create an Image, Audio, Text, Note, generic File, generated-video, placeholder, or unrelated Component node.
 
 ### Reference analyzer
 
@@ -54,6 +61,9 @@ For character assets, configure a separate generator node for every `character_i
 
 ## Graph invariants
 
+- Every uploaded reference video starts at one visible, loaded Lumina built-in Video node. Downstream analysis must originate from that node.
+- Verify `node_created`, `video_loaded`, and `node_visible` separately. Continue only when all are true and the bound source matches the user's upload.
+- Reuse an existing correct native Video node rather than creating a duplicate. Never use a node label as evidence of node type.
 - Keep each video's branches inside one labeled group.
 - Never connect a generated clip back into the evidence-analysis branch.
 - Preserve the original source node even after derived frames or audio exist.

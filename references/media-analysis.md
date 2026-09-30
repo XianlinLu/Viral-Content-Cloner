@@ -2,6 +2,24 @@
 
 Load this reference during ingest, frame/audio evidence extraction, or batch processing.
 
+## Native video-node ingest
+
+Classify the uploaded item before creating a source node. A video file or URL resolving to video media must be represented by Lumina's built-in Video node. Use one native Video node per uploaded reference and reuse an already-correct native node instead of duplicating it.
+
+Required ingest sequence:
+
+1. identify the item as video from the upload object, MIME/media type, extension plus probe, or returned metadata;
+2. create or select a Lumina built-in Video node, never a generated-video or generic container node;
+3. bind the original uploaded asset or resolved video URL to that node's media source;
+4. position the node inside the source video's visible Canvas group and give it a stable name such as `01_source_video_a`;
+5. wait for the native node to finish loading;
+6. verify its node id and native Video type, non-empty bound source, visible Canvas presence, and either a playable preview or readable duration/dimensions;
+7. only then connect sampling, transcription, or direct-video analysis branches.
+
+The following are invalid substitutes for a reference-video source: Image, Audio, Text, Note, generic File, an arbitrary Component, a generated-video output node, a URL-only text node, or a placeholder with a video-looking label.
+
+Do not treat `node_created` as `video_loaded`. Do not treat `video_loaded` as `node_visible`. All three conditions must pass. If the built-in Video node cannot be created, loaded, or shown, preserve the upload handle, mark ingest failed, and stop that video's downstream branches. Never hide the failure by creating a different node type.
+
 ## Visual sampling
 
 Default short-form policy:
@@ -56,6 +74,7 @@ If the video has music or sound effects but no speech, return:
 Record these facts before analysis:
 
 - source name and stable canvas node name;
+- native node id, node type, load status, and Canvas visibility;
 - duration and aspect ratio;
 - resolution;
 - visible watermark or burned-in captions;
@@ -69,7 +88,7 @@ Warn when the source is below 720p, heavily compressed, cropped, or dominated by
 
 Process videos independently. For each item:
 
-1. preflight;
+1. preflight and native Video-node ingest verification;
 2. visual/audio evidence extraction;
 3. analysis;
 4. prompt package;

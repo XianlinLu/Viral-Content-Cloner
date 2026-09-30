@@ -6,6 +6,9 @@ Load this reference during validation or after any node failure.
 
 ### Evidence gate
 
+- Every uploaded reference video is bound to a Lumina built-in Video node, not an unrelated node type.
+- The native Video node is visibly present on the Canvas, fully loaded, and exposes a playable preview or readable video metadata.
+- The node's bound source matches the user's original upload; a filename, URL label, or node title alone is not proof.
 - Source is readable and its duration/aspect ratio are known or marked unknown.
 - Frame or direct-video evidence covers beginning, middle, ending, and short reveals.
 - Transcript is aligned to time or explicitly unavailable.
@@ -55,6 +58,8 @@ Do not rerun successful upstream nodes unless the evidence itself is wrong. Rege
 
 | Failure | Detection | Recovery | Degraded result |
 |---|---|---|---|
+| wrong source node type | uploaded video appears as Image, Audio, Text, Note, File, generated-video, placeholder, or unrelated Component | remove or ignore the incorrect node, create the Lumina built-in Video node, bind the original upload, and re-verify ingest | no downstream analysis until corrected |
+| native Video node not loaded or not visible | node exists but source is empty, load is pending/failed, preview and metadata are absent, or the node is off-canvas/not rendered | retry binding/loading once, bring the native node into the visible source group, then verify creation, load, and visibility separately | preserve upload handle; stop that video's branch if still unresolved |
 | source cannot load | ingest node fails | ask for re-upload, accessible URL, or supported encode | no analysis; keep graph placeholder |
 | visual sampler missing | no connected component | use direct video understanding with timestamp requirement | lower temporal precision |
 | visual analysis fails | error or invalid JSON | retry once; switch exact -> rewrite | flat viral-logic analysis |
@@ -101,5 +106,7 @@ Do not say “finished” until the promised execution-mode output exists:
 - `analyze`: parsed analysis + transcript status + prompt package;
 - `build`: connected graph with visible parameters and missing-tool labels;
 - `auto`: previewable/exportable master plus QA report.
+
+No mode is complete if an uploaded reference video lacks its visible, loaded Lumina built-in Video source node.
 
 For character-based `auto` runs, completion also requires a passing ledger from `short-drama-production.md`. A final export does not override a failed character, approval, audio, or edge gate.

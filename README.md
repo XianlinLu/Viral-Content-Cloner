@@ -7,7 +7,7 @@
 **Lumina Viral Content Cloner is an original, purpose-built Skill for Lumina Canvas Agent.** It turns reference videos into traceable, reusable Canvas workflows that can analyze creative structure, assemble generation prompts, replace people or products, generate shot-level clips, validate continuity, and export finished media.
 
 ```text
-Reference video
+Reference video (loaded Lumina native Video node)
   ├─ Visual samples / timestamp evidence ─┐
   ├─ Audio / dialogue transcript ─────────┼→ Analysis → Script lock → Solo character nodes → User approval
   └─ Person / product references ─────────┘
@@ -20,6 +20,7 @@ The Skill is designed around Lumina's native Agent, Node, Component, Tool, multi
 ### Capabilities
 
 - Analyze one reference video or a batch of videos.
+- Route every uploaded reference video into Lumina's built-in Video node, bind the original media, and verify that the loaded node is visibly present on the Canvas before analysis.
 - Use `exact` mode for close reconstruction or `rewrite` mode for transferable viral structure.
 - Support pure cloning, person replacement, product/garment replacement, and full replacement.
 - Produce structured analysis, timestamped dialogue, a global continuity prompt, and shot prompts.
@@ -34,6 +35,7 @@ The Skill is designed around Lumina's native Agent, Node, Component, Tool, multi
 
 | Design area | Lumina implementation |
 |---|---|
+| Video ingest | One visible, loaded Lumina built-in Video node per uploaded reference; no generic or unrelated fallback node |
 | Media evidence | Video-understanding or frame-sampling Components |
 | Speech evidence | A transcription Component connected as an Agent Tool |
 | Reasoning | Vision-capable Agent model and structured analysis Component |
@@ -52,6 +54,7 @@ Lumina Agent can call a workflow only after it has been packaged as a **Componen
 2. Add an Agent node.
 3. Use the body of [SKILL.md](./SKILL.md) as the Agent's system instructions, or import it through your team's Skill workflow.
 4. Connect Components that provide:
+   - native Lumina Video-node creation, source binding, loading, and Canvas visibility verification;
    - video loading and metadata inspection;
    - frame sampling or direct video understanding;
    - speech transcription;
@@ -116,6 +119,7 @@ Analyze these five videos as a batch. Extract their shared first-three-second ho
 ### Original design principles
 
 - **Evidence first:** describe only what the supplied video frames and audio support.
+- **Native video ingest:** an uploaded video must appear as a loaded, visible Lumina Video node before any downstream branch runs.
 - **Canvas traceability:** keep sources, evidence, prompts, anchors, clips, QA, and exports visible.
 - **Human approval gates:** never treat node success or silence as character approval.
 - **Single-character assets:** one person, one asset, one node, with separate edges into every dependent generator.
@@ -144,7 +148,7 @@ MIT. See [LICENSE.md](./LICENSE.md).
 **Lumina Viral Content Cloner 是一套为 Lumina Canvas Agent 原创设计、从零构建的 Skill。** 它能够把参考视频转换成可追溯、可复用的 Lumina 画布工作流，完成创意结构分析、生成提示词组装、人物或商品替换、逐镜生成、一致性验证与最终导出。
 
 ```text
-参考视频
+参考视频（已加载的 Lumina 原生视频节点）
   ├─ 视觉采样 / 时间戳证据 ─┐
   ├─ 音频 / 对白转录 ──────┼→ 结构化分析 → 剧本锁定 → 独立人物节点 → 用户确认
   └─ 人物 / 商品替换素材 ──┘
@@ -157,6 +161,7 @@ MIT. See [LICENSE.md](./LICENSE.md).
 ### 核心能力
 
 - 分析单条参考视频或批量视频。
+- 每个用户上传的参考视频都必须路由到 Lumina 自带的视频节点，绑定原始媒体，并在分析前验证该节点已经正确加载且真实显示在画布上。
 - 使用 `exact` 模式进行精确复刻，或使用 `rewrite` 模式提取可迁移的爆款结构。
 - 支持纯复刻、替换人物、替换商品/服装以及人物与商品全替换。
 - 输出结构化分析、时间轴对白、全局一致性 Prompt 和逐镜 Prompt。
@@ -171,6 +176,7 @@ MIT. See [LICENSE.md](./LICENSE.md).
 
 | 设计环节 | Lumina 实现方式 |
 |---|---|
+| 视频导入 | 每个上传的参考视频对应一个已加载、画布可见的 Lumina 原生视频节点，禁止使用通用或无关节点替代 |
 | 媒体证据 | 视频理解或帧采样 Component |
 | 语音证据 | 作为 Agent Tool 连接的转录 Component |
 | 分析推理 | 具备视觉能力的 Agent 模型与结构化分析 Component |
@@ -189,6 +195,7 @@ Lumina Agent 只有在工作流被封装成 **Component** 并作为 **Tool** 连
 2. 添加 Agent 节点。
 3. 将 [SKILL.md](./SKILL.md) 的正文作为 Agent 系统指令，或通过团队的 Skill 工作流导入。
 4. 为 Agent 连接能够提供以下能力的 Components：
+   - 创建 Lumina 原生视频节点、绑定视频源、加载并验证画布可见性；
    - 视频读取与元数据检查；
    - 帧采样或直接视频理解；
    - 语音转录；
@@ -253,6 +260,7 @@ Lumina Agent 只有在工作流被封装成 **Component** 并作为 **Tool** 连
 ### 原创设计原则
 
 - **证据优先**：只描述用户提供的视频画面与音频真正支持的内容。
+- **原生视频导入**：上传视频必须先成为已加载、可见的 Lumina 原生视频节点，才能运行任何下游分支。
 - **画布可追溯**：源素材、证据、Prompt、锚点、镜头、QA 和导出全部保留在画布中。
 - **人工确认门槛**：节点成功或用户沉默都不能代替人物素材确认。
 - **单人人物资产**：一个人物、一份素材、一个节点，并通过独立连线接入所有下游生成节点。
